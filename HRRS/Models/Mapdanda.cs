@@ -10,7 +10,7 @@ namespace HRRS.Models
         public string serialNumber { get; set; }
         public string name { get; set; }
         public string parimaad { get; set; } = null;
-        public string group { get; set; } = null;
+        public string group { get; set; } = null;   
         public bool isAvailableDivided { get; set; }
         public bool is25Active { get; set; }
         public bool is50Active { get; set; }

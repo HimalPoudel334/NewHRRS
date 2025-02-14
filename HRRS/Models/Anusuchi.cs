@@ -6,7 +6,8 @@ public class Anusuchi
     public string dafaNo { get; set; }
 }
 
-namespace HRRS.Models.Parichhed{
+namespace HRRS.Models.Parichhed 
+{
     public class Parichhed
     {
         public int id { get; set; }

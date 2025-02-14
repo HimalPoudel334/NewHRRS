@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using HRRS.Helpers;
+using HRRS.Models.Parichhed;
 
 namespace HRRS.Controllers.Parichheds
 {
@@ -12,12 +13,35 @@ namespace HRRS.Controllers.Parichheds
     {
         [HttpPost]
         [Route("api/Parichhed")]
-        public IHttpActionResult Create(Models.Parichhed.Parichhed model)
+        public IHttpActionResult Create(Parichhed model)
         {
             try
             {
 
                 DapperHelper.ExecuteStoredProcedure("sp_InsertParichhed", model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var except = ex.Message;
+                return ResponseMessage(
+                    Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                            new { sucess = false, error_message = except }
+                    )
+                );
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Parichhed/{id}/update")]
+        public IHttpActionResult Update(int id, Parichhed model)
+        {
+            try
+            {
+
+                DapperHelper.ExecuteStoredProcedure("sp_UpdateParichhed", model);
 
                 return Ok();
             }
@@ -40,8 +64,8 @@ namespace HRRS.Controllers.Parichheds
         {
             try
             {
-                var list = DapperHelper.QueryStoredProcedure<Models.Parichhed.Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds" }).ToList();
-                return Ok(new ResultDto<List<Models.Parichhed.Parichhed>>(true, list, null));
+                var list = DapperHelper.QueryStoredProcedure<Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds" }).ToList();
+                return Ok(new ResultDto<List<Parichhed>>(true, list, null));
             }
             catch (Exception ex)
             {
@@ -61,8 +85,8 @@ namespace HRRS.Controllers.Parichheds
         {
             try
             {
-                var list = DapperHelper.QueryStoredProcedure<Models.Parichhed.Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds", id }).FirstOrDefault();
-                return Ok(new ResultDto<Models.Parichhed.Parichhed>(true, list));
+                var list = DapperHelper.QueryStoredProcedure<Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds", id }).FirstOrDefault();
+                return Ok(new ResultDto<Parichhed>(true, list));
             }
             catch (Exception ex)
             {

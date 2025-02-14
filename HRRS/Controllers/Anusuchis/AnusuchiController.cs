@@ -1,17 +1,19 @@
-﻿using System;
-using System.Net.Http;
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 using HRRS.Helpers;
-using System.Linq;
 
-namespace HRRS.Controllers.Anusuchi
+namespace HRRS.Controllers.Anusuchis
 {
-    public class Anusuchi : ApiController
+    public class AnusuchiController : ApiController
     {
 
         [HttpPost]
-        [Route("api/Anusuchi")]
+        [Route("api/anusuchi")]
         public IHttpActionResult Create(Anusuchi model)
         {
             try
@@ -33,15 +35,39 @@ namespace HRRS.Controllers.Anusuchi
             }
         }
 
-        [HttpGet]
-        [Route("api/Anusuchi")]
+        [HttpPut]
+        [Route("api/anusuchi/{anusuchiId}/update")]
+        public IHttpActionResult Update(Anusuchi model)
+        {
+            try
+            {
 
+                DapperHelper.ExecuteStoredProcedure("sp_UpdateAnusuchi", model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                var except = ex.Message;
+                return ResponseMessage(
+                    Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                            new { sucess = false, error_message = except }
+                    )
+                );
+            }
+        }
+
+
+
+        [HttpGet]
+        [Route("api/anusuchi")]
         public IHttpActionResult Index()
         {
             try
             {
                 var list = DapperHelper.QueryStoredProcedure<Anusuchi>("sp_SelectFromTable", new { tableName = "Anusuchis" }).ToList();
-                return Ok(list);
+                return Ok(new ResultDto<List<Anusuchi>>(true, list));
             }
             catch (Exception ex)
             {
@@ -56,13 +82,13 @@ namespace HRRS.Controllers.Anusuchi
         }
 
         [HttpGet]
-        [Route("api/Anusuchi/{id}")]
+        [Route("api/anusuchi/{id}")]
         public IHttpActionResult GetById(int id)
         {
             try
             {
-                var list = DapperHelper.QueryStoredProcedure<Anusuchi>("sp_SelectFromTable", new { tableName = "Anusuchis", id }).ToList();
-                return Ok(list);
+                var anusuchi = DapperHelper.QueryStoredProcedure<Anusuchi>("sp_SelectFromTable", new { tableName = "Anusuchis", id }).FirstOrDefault();
+                return Ok(new ResultDto<Anusuchi>(true, anusuchi));
             }
             catch (Exception ex)
             {

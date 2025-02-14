@@ -2,12 +2,12 @@
 {
     public ResultDto(bool isSuccess, T data = null, string errorMessage = null)
     {
-        IsSuccess = isSuccess;
-        ErrorMessage = errorMessage;
-        Data = data;
+        this.isSuccess = isSuccess;
+        this.errorMessage = errorMessage;
+        this.data = data;
     }
 
-    public bool IsSuccess { get; set; }
-    public string ErrorMessage { get; }
-    public T Data { get; }
+    public bool isSuccess { get; set; }
+    public string errorMessage { get; }
+    public T data { get; }
 }
