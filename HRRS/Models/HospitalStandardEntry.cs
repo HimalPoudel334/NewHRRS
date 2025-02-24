@@ -9,6 +9,7 @@ public class HospitalStandardEntry
     public DateTime? UpdatedAt { get; set; }
 
     public EntryStatus Status { get; set; }
+    public int MyProperty { get; set; }
 
 }
 
@@ -18,4 +19,10 @@ public enum EntryStatus
     Approved,
     Rejected,
     Draft
+}
+
+public enum SubmissionType
+{
+    Registration,
+    Renewal
 }

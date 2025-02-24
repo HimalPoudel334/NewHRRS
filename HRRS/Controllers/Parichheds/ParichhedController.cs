@@ -12,7 +12,7 @@ namespace HRRS.Controllers.Parichheds
     public class ParichhedController : ApiController
     {
         [HttpPost]
-        [Route("api/Parichhed")]
+        [Route("api/parichhed")]
         public IHttpActionResult Create(Parichhed model)
         {
             try
@@ -28,14 +28,14 @@ namespace HRRS.Controllers.Parichheds
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<Parichhed>(false, null, except)
                     )
                 );
             }
         }
 
         [HttpPost]
-        [Route("api/Parichhed/{id}/update")]
+        [Route("api/parichhed/{id}/update")]
         public IHttpActionResult Update(int id, Parichhed model)
         {
             try
@@ -51,14 +51,14 @@ namespace HRRS.Controllers.Parichheds
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<Parichhed>(false, null, except)
                     )
                 );
             }
         }
 
         [HttpGet]
-        [Route("api/Parichhed")]
+        [Route("api/parichhed")]
 
         public IHttpActionResult Index()
         {
@@ -73,20 +73,20 @@ namespace HRRS.Controllers.Parichheds
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<List<Parichhed>>(false, null, except)
                     )
                 );
             }
         }
 
         [HttpGet]
-        [Route("api/Parichhed/{id}")]
+        [Route("api/parichhed/{id}")]
         public IHttpActionResult GetById(int id)
         {
             try
             {
-                var list = DapperHelper.QueryStoredProcedure<Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds", id }).FirstOrDefault();
-                return Ok(new ResultDto<Parichhed>(true, list));
+                var parichhed = DapperHelper.QueryStoredProcedure<Parichhed>("sp_SelectFromTable", new { tableName = "Parichheds", id }).FirstOrDefault();
+                return Ok(new ResultDto<Parichhed>(true, parichhed));
             }
             catch (Exception ex)
             {
@@ -94,7 +94,28 @@ namespace HRRS.Controllers.Parichheds
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<Parichhed>(false, null, except)
+                    )
+                );
+            }
+        }
+
+        [HttpGet]
+        [Route("api/parichhed/")]
+        public IHttpActionResult GetParichhedOfAnusuchi(int? anusuchiId)
+        {
+            try
+            {
+                var list = DapperHelper.QueryStoredProcedure<Parichhed>("sp_GetParichhedsOfAnusuchi", new { anusuchiId }).ToList();
+                return Ok(new ResultDto<List<Parichhed>>(true, list));
+            }
+            catch (Exception ex)
+            {
+                var except = ex.Message;
+                return ResponseMessage(
+                    Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                            new ResultDto<List<Parichhed>>(false, null, except)
                     )
                 );
             }

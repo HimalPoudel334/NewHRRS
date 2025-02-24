@@ -16,7 +16,8 @@ namespace HRRS.Dto.Login
     {
         public long userId { get; set; }
         public string username { get; set; }
-        public string userType { get; set; }
+        public string userRole { get; set; }
+        public int healthFacilityId { get; set; }
 
     }
 

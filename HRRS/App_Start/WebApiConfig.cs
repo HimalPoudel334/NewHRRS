@@ -18,7 +18,6 @@ namespace HRRS
             config.EnableCors(cors);
 
             // Web API configuration and services
-
             // Web API routes
             config.MapHttpAttributeRoutes();
 
@@ -28,5 +27,6 @@ namespace HRRS
                 defaults: new { id = RouteParameter.Optional }
             );
         }
+
     }
 }

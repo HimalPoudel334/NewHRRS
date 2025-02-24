@@ -18,7 +18,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace HRRS.Controllers.Auth
 {
-    [Route("api")]
     public class AuthController : ApiController
     {
         [HttpPost]
@@ -37,14 +36,15 @@ namespace HRRS.Controllers.Auth
                 {
                     username = user.username,
                     userId = user.userId,
-                    userType = user.userType,
+                    userRole = user.userType,
+                    healthFacilityId = user.healthFacilityId ?? 0
                 },
                 token = CreateToken(user)
             };
             return Ok(new ResultDto<AuthResponseDto>(true, authresp));
         }
 
-        public static string CreateToken(User user)
+        private static string CreateToken(User user)
         {
             var secretKey = ConfigurationManager.AppSettings["JWT:SecretKey"];
             var issuer = ConfigurationManager.AppSettings["JWT:Issuer"];
@@ -61,6 +61,7 @@ namespace HRRS.Controllers.Auth
                     new Claim(ClaimTypes.Name, user.username),
                     new Claim(ClaimTypes.NameIdentifier, user.userId.ToString()),
                     new Claim(ClaimTypes.Role, user.userType.ToString()),
+                    new Claim("HealthFacilityId", user.healthFacilityId.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(expiresInMinutes),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(symmetricKey), SecurityAlgorithms.HmacSha256Signature),
@@ -72,61 +73,6 @@ namespace HRRS.Controllers.Auth
             return tokenHandler.WriteToken(token);
         }
 
-    }
-
-
-    public class JwtAuthorizeAttribute : AuthorizeAttribute
-    {
-        protected override bool IsAuthorized(HttpActionContext actionContext)
-        {
-            var authHeader = actionContext.Request.Headers.Authorization;
-            if (authHeader != null && authHeader.Scheme == "Bearer")
-            {
-                var token = authHeader.Parameter;
-                return JwtValidator.ValidateToken(token);
-            }
-
-            return false;
-        }
-
-        protected override void HandleUnauthorizedRequest(HttpActionContext actionContext)
-        {
-            actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized);
-        }
-    }
-
-
-    public class JwtValidator
-    {
-        public static bool ValidateToken(string token)
-        {
-            var secretKey = ConfigurationManager.AppSettings["JWT:SecretKey"];
-            var issuer = ConfigurationManager.AppSettings["JWT:Issuer"];
-            var audience = ConfigurationManager.AppSettings["JWT:Audience"];
-
-            var symmetricKey = Encoding.UTF8.GetBytes(secretKey);
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            try
-            {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(symmetricKey),
-                    ValidateIssuer = true,
-                    ValidIssuer = issuer,
-                    ValidateAudience = true,
-                    ValidAudience = audience,
-                    ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken);
-
-                return true;
-            }
-            catch
-            {
-                return false; // If validation fails, return false
-            }
-        }
     }
 
 }

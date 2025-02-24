@@ -9,6 +9,7 @@ using HRRS.Helpers;
 using HRRS.Models;
 namespace HRRS.Controllers.Mapdandas
 {
+    [Authorize]
     public class MapdandaController : ApiController
     {
         [HttpPost]
@@ -36,7 +37,7 @@ namespace HRRS.Controllers.Mapdandas
 
         [HttpPut]
         [Route("api/mapdanda/{mapdandaId}/update")]
-        public IHttpActionResult Update(int id, Mapdanda model)
+        public IHttpActionResult Update(int mapdandaId, Mapdanda model)
         {
             try
             {
@@ -56,28 +57,6 @@ namespace HRRS.Controllers.Mapdandas
             }
 
 
-        }
-
-
-        [HttpGet]
-        [Route("api/mapdanda")]
-        public IHttpActionResult Index()
-        {
-            try
-            {
-                var list = DapperHelper.QueryStoredProcedure<Models.Mapdanda>("sp_SelectFromTable", new { tableName = "Mapdandas" }).ToList();
-                return Ok(new ResultDto<List<Models.Mapdanda>>(true, list, null));
-            }
-            catch (Exception ex)
-            {
-                var except = ex.Message;
-                return ResponseMessage(
-                    Request.CreateResponse(
-                        HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
-                    )
-                );
-            }
         }
 
         [HttpGet]
@@ -103,36 +82,60 @@ namespace HRRS.Controllers.Mapdandas
 
         [HttpGet]
         [Route("api/mapdanda")]
-        public IHttpActionResult GetMapdandaOfAnusuchi(int? anusuchiId, int? parichhedId, int? subParichhedId)
+        public IHttpActionResult GetAll([FromUri] int? anusuchiId, [FromUri] int? parichhedId, [FromUri] int? subParichhedId)
         {
             try
             {
-                var list = DapperHelper.QueryStoredProcedure<MapdandaDto>("sp_SelectAnusuchiMapdanda", new { id = anusuchiId}).ToList();
+                var list = DapperHelper.QueryStoredProcedure<MapdandaDto>("sp_GetFilteredMapdandas", new { anusuchiId, parichhedId, subParichhedId }).ToList();
 
-
-                var res = list.GroupBy(m => new { m.isAvailableDivided, m.group })
-                    .Select(n => new GroupedMapdandaByGroupName
+                var res = list
+                    .GroupBy(a => a.subSubParichhed)
+                    .Select(b => new GroupedSubSubParichhedAndMapdanda
                     {
-                        hasBedCount = n.Key.isAvailableDivided,
-                        groupName = n.Key.group,
-                        groupedMapdanda = n.Select(m => new GroupedMapdanda
+                        formType = b.FirstOrDefault()?.formType,
+                        hasBedCount = b.FirstOrDefault()?.isAvailableDivided,
+                        subSubParixed = b.Key,
+                        list = b
+                        .GroupBy(m => m.group)
+                        .Select(c => new GroupedMapdandaByGroupName
                         {
-                            id = m.id,
-                            name = m.name,
-                            serialNumber = m.serialNumber,
-                            is100Active = m.is100Active,
-                            is200Active = m.is200Active,
-                            is50Active = m.is50Active,
-                            is25Active = m.is25Active,
-                            status = m.status,
-                            parimaad = m.parimaad,
-                            group = m.group,
-                            isAvailableDivided = m.isAvailableDivided,
+                            formType = c.FirstOrDefault()?.formType,
+                            groupName = c.Key,
+                            groupedMapdanda = c.Select(m => new GroupedAdmimMapdanda
+                            {
+                                id = m.id,
+                                name = m.name,
+                                serialNumber = m.serialNumber,
+                                is100Active = m.is100Active,
+                                is200Active = m.is200Active,
+                                is50Active = m.is50Active,
+                                is25Active = m.is25Active,
+                                status = m.status,
+                                parimaad = m.parimaad,
+                                group = m.group,
+                                value25 = m.value25,
+                                value50 = m.value50,
+                                value100 = m.value100,
+                                value200 = m.value200,
+                                col5 = m.col5,
+                                col6 = m.col6,
+                                col7 = m.col7,
+                                col8 = m.col8,
+                                col9 = m.col9,
+                                isCol5Active = m.isCol5Active,
+                                isCol6Active = m.isCol6Active,
+                                isCol7Active = m.isCol7Active,
+                                isCol8Active = m.isCol8Active,
+                                isCol9Active = m.isCol9Active,
+                                isAvailableDivided = m.isAvailableDivided,
+                            }).ToList()
+
                         }).ToList()
+                    })
+                    .ToList();
 
-                    }).ToList();
 
-                return Ok(new ResultDto<List<GroupedMapdandaByGroupName>>(true, res));
+                return Ok(new ResultDto<List<GroupedSubSubParichhedAndMapdanda>>(true, res));
             }
             catch (Exception ex)
             {
@@ -140,7 +143,7 @@ namespace HRRS.Controllers.Mapdandas
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new ResultDto<List<GroupedMapdandaByGroupName>>(false, null, except)
+                            new ResultDto<List<GroupedSubSubParichhedAndMapdanda>>(false, null, except)
                     )
                 );
             }
@@ -181,6 +184,7 @@ namespace HRRS.Controllers.Mapdandas
                     .GroupBy(a => a.subSubParichhed)
                     .Select(b => new GroupedSubSubParichhedAndMapdanda
                     {
+                        formType = b.FirstOrDefault()?.formType,
                         hasBedCount = b.FirstOrDefault()?.isAvailableDivided,
                         subSubParixed = b.Key,
                         list = b
@@ -188,7 +192,7 @@ namespace HRRS.Controllers.Mapdandas
                         .Select(c => new GroupedMapdandaByGroupName
                         {
                             groupName = c.Key,
-                            groupedMapdanda = c.Select(m => new GroupedMapdanda
+                            groupedMapdanda = c.Select(m => new GroupedAdmimMapdanda
                             {
                                 id = m.id,
                                 name = m.name,
@@ -235,6 +239,20 @@ namespace HRRS.Controllers.Mapdandas
             public bool is50Active { get; set; }
             public bool is100Active { get; set; }
             public bool is200Active { get; set; }
+            public string value25 { get; set; }
+            public string value50 { get; set; }
+            public string value100 { get; set; }
+            public string value200 { get; set; }
+            public string col5 { get; set; }
+            public string col6 { get; set; }
+            public string col7 { get; set; }
+            public string col8 { get; set; }
+            public string col9 { get; set; }
+            public bool isCol5Active { get; set; }
+            public bool isCol6Active { get; set; }
+            public bool isCol7Active { get; set; }
+            public bool isCol8Active { get; set; }
+            public bool isCol9Active { get; set; }
             public bool status { get; set; } = true;
             public int anusuchiId { get; set; }
 
@@ -244,6 +262,7 @@ namespace HRRS.Controllers.Mapdandas
 
             public int? subSubParichhedId { get; set; }
             public string subSubParichhed { get; set; }
+            public int? formType { get; set; }
         }
     }
 }

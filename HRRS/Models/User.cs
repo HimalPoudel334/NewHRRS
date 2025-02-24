@@ -8,6 +8,6 @@ namespace HRRS.Models
         public string username { get; set; }
         public string password { get; set; }
         public string userType { get; set; } = "Hospital";
-        public int? HealthFacilityId { get; set; }
+        public int? healthFacilityId { get; set; }
     }
 }

@@ -38,7 +38,7 @@ namespace HRRS.Controllers.SubParichheds
 
         [HttpPost]
         [Route("api/subparichhed")]
-        public IHttpActionResult Create(Parichhed model)
+        public IHttpActionResult Create(SubParichhed model)
         {
             try
             {
@@ -102,6 +102,27 @@ namespace HRRS.Controllers.SubParichheds
             }
 
 
+        }
+
+        [HttpGet]
+        [Route("api/subparichhed")]
+        public IHttpActionResult GetParichhedOfAnusuchi(int parichhedId)
+        {
+            try
+            {
+                var list = DapperHelper.QueryStoredProcedure<Parichhed>("sp_GetSubParichhedsByParichhed", new { parichhedId }).ToList();
+                return Ok(new ResultDto<List<Parichhed>>(true, list));
+            }
+            catch (Exception ex)
+            {
+                var except = ex.Message;
+                return ResponseMessage(
+                    Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                            new ResultDto<List<Parichhed>>(false, null, except)
+                    )
+                );
+            }
         }
 
 
