@@ -21,7 +21,7 @@ namespace HRRS.Controllers.Anusuchis
 
                 DapperHelper.ExecuteStoredProcedure("sp_InsertAnusuchi", model);
 
-                return Ok();
+                return Ok(new ResultDto<Anusuchi>(true));
             }
             catch (Exception ex)
             {
@@ -44,7 +44,7 @@ namespace HRRS.Controllers.Anusuchis
 
                 DapperHelper.ExecuteStoredProcedure("sp_UpdateAnusuchi", model);
 
-                return Ok();
+                return Ok(new ResultDto<Anusuchi>(true));
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace HRRS.Controllers.Anusuchis
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<List<Anusuchi>>(false, null, except)
                     )
                 );
             }
@@ -96,7 +96,7 @@ namespace HRRS.Controllers.Anusuchis
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                           new ResultDto<Anusuchi>(false, null, except)
                     )
                 );
             }

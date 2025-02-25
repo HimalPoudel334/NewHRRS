@@ -41,6 +41,7 @@ namespace HRRS.Controllers.Mapdandas
         {
             try
             {
+                model.id = mapdandaId;
                 DapperHelper.ExecuteStoredProcedure("sp_UpdateMapdanda", model);
 
                 return Ok();

@@ -222,6 +222,7 @@
     <Compile Include="Controllers\Parichheds\ParichhedController.cs" />
     <Compile Include="Controllers\SubParichheds\SubParichhedController.cs" />
     <Compile Include="Controllers\SubSubParichheds\SubSubParichhedController.cs" />
+    <Compile Include="Dto\HealthFacilityDto.cs" />
     <Compile Include="Dto\HospitalStandardDto.cs" />
     <Compile Include="Dto\Login\LoginDto.cs" />
     <Compile Include="Dto\MapdandaDto.cs" />
@@ -231,6 +232,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DapperHelper.cs" />
+    <Compile Include="Helpers\TvpExtensions.cs" />
     <Compile Include="Models\Anusuchi.cs" />
     <Compile Include="Models\HealthFacility.cs" />
     <Compile Include="Models\HospitalStandard.cs" />

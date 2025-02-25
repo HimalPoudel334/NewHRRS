@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Http;
+using Dapper;
 using HRRS.Controllers.Auth;
 using HRRS.Dto.HospitalStandard;
 using HRRS.Helpers;
@@ -18,7 +19,7 @@ namespace HRRS.Controllers.HospitalStandards
     {
         [HttpGet]
         [Route("api/standard/{submissionCode}")]
-        public IHttpActionResult Get(Guid submissionCode, [FromUri] int? anusuchiId, [FromUri] int? parichhedId, [FromUri] int? subParichhedId, ClaimsPrincipal user)
+        public IHttpActionResult Get(Guid submissionCode, [FromUri] int? anusuchiId, [FromUri] int? parichhedId, [FromUri] int? subParichhedId)
         {
             try
             {
@@ -80,7 +81,28 @@ namespace HRRS.Controllers.HospitalStandards
         {
             try
             {
-                DapperHelper.ExecuteStoredProcedure("sp_CreateOrUpdateHospitalStandardEntry", new { dto.submissionCode, hospitalStandardDto = dto.mapdandas });
+                AddOrUpdateHospitalStandard(dto);
+                return Ok(new ResultDto<List<HospitalStandardEntryDto>>(true, null));
+            }
+            catch (Exception ex)
+            {
+                var except = ex.Message;
+                return ResponseMessage(
+                    Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                            new ResultDto<List<HospitalStandardEntryDto>>(false, null, except)
+                    )
+                );
+            }
+        }
+
+        [HttpPost]
+        [Route("api/submissions/update")]
+        public IHttpActionResult Update(HospitalStandardEntryDto dto)
+        {
+            try
+            {
+                AddOrUpdateHospitalStandard(dto, false);
                 return Ok(new ResultDto<List<HospitalStandardEntryDto>>(true, null));
             }
             catch (Exception ex)
@@ -110,7 +132,7 @@ namespace HRRS.Controllers.HospitalStandards
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<List<HospitalEntryDto>>(false, null, except)
                     )
                 );
             }
@@ -132,7 +154,7 @@ namespace HRRS.Controllers.HospitalStandards
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                             new ResultDto<HospitalEntryDto> (false, null, except)
                     )
                 );
             }
@@ -179,10 +201,18 @@ namespace HRRS.Controllers.HospitalStandards
                 return ResponseMessage(
                     Request.CreateResponse(
                         HttpStatusCode.InternalServerError,
-                            new { sucess = false, error_message = except }
+                            new ResultDto<List<HospitalStandardModel>>(false, null, except)
+
                     )
                 );
             }
+        }
+
+        private void AddOrUpdateHospitalStandard(HospitalStandardEntryDto dto, bool isInsert = true)
+        {
+            var standards = dto.mapdandas.ToDataTable("dbo.HospitalMapdandasDtoType");
+
+            DapperHelper.ExecuteStoredProcedure("sp_CreateOrUpdateHospitalStandardEntry", new { isInsert, dto.submissionCode, hospitalStandardDto = standards.AsTableValuedParameter("dbo.HospitalMapdandasDtoType") });
         }
 
     }
